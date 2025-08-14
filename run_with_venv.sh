@@ -17,7 +17,7 @@ fi
 
 # Run the main.py script
 echo "🚀 Starting the server with virtual environment..."
-python main.py
+python main_fixed.py
 
 # If the server was stopped, deactivate the virtual environment
 deactivate
