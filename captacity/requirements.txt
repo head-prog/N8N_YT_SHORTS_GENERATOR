@@ -1,3 +1,0 @@
-moviepy
-pillow
-openai

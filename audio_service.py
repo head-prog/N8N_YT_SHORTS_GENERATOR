@@ -50,6 +50,16 @@ def mix_audio_with_bgm_and_cta(voice_audio_path, bgm_path=None, cta_path=None, b
         # Create composite audio with voice and BGM
         if len(audio_clips) > 1:
             composite_audio = CompositeAudioClip(audio_clips)
+            # Ensure fps is properly set for composite audio
+            try:
+                # Set fps based on voice audio
+                if hasattr(voice_audio, 'fps') and voice_audio.fps:
+                    composite_audio.fps = voice_audio.fps
+                else:
+                    composite_audio.fps = 44100  # Standard audio fps
+            except Exception as fps_error:
+                print(f"⚠️ Setting fps for composite audio: {fps_error}")
+                composite_audio.fps = 44100
         else:
             composite_audio = voice_audio
         
@@ -61,6 +71,16 @@ def mix_audio_with_bgm_and_cta(voice_audio_path, bgm_path=None, cta_path=None, b
                 
                 # Concatenate composite audio with CTA
                 final_audio = concatenate_audioclips([composite_audio, cta_audio])
+                # Ensure fps is set for concatenated audio
+                try:
+                    if hasattr(voice_audio, 'fps') and voice_audio.fps:
+                        final_audio.fps = voice_audio.fps
+                    else:
+                        final_audio.fps = 44100
+                except Exception as fps_error:
+                    print(f"⚠️ Setting fps for final audio: {fps_error}")
+                    final_audio.fps = 44100
+                    
                 print(f"✅ CTA added: {cta_audio.duration:.2f}s at the end")
                 
             except Exception as cta_error:
@@ -68,6 +88,17 @@ def mix_audio_with_bgm_and_cta(voice_audio_path, bgm_path=None, cta_path=None, b
                 final_audio = composite_audio
         else:
             final_audio = composite_audio
+        
+        # Final fps check and fallback
+        try:
+            if not hasattr(final_audio, 'fps') or final_audio.fps is None:
+                if hasattr(voice_audio, 'fps') and voice_audio.fps:
+                    final_audio.fps = voice_audio.fps
+                else:
+                    final_audio.fps = 44100
+        except Exception as fps_error:
+            print(f"⚠️ Final fps check failed: {fps_error}")
+            final_audio.fps = 44100
         
         # Save the mixed audio
         temp_mixed = tempfile.NamedTemporaryFile(delete=False, suffix='.mp3')
@@ -90,17 +121,45 @@ def mix_audio_with_bgm_and_cta(voice_audio_path, bgm_path=None, cta_path=None, b
     except Exception as e:
         print(f"❌ Audio mixing failed: {e}")
         traceback.print_exc()
-        # Return fallback with basic timing info
-        voice_duration = 0
-        if 'voice_audio' in locals():
-            voice_duration = voice_audio.duration
-        timing_info = {
-            'voice_duration': voice_duration,
-            'cta_start': None,
-            'cta_duration': 0,
-            'total_duration': voice_duration
-        }
-        return voice_audio_path, voice_duration, timing_info
+        
+        # Try to provide a working fallback - just use the original voice audio
+        try:
+            print("🔄 Using fallback: original voice audio only")
+            fallback_audio = safe_load_audio(voice_audio_path)
+            
+            # Create a temporary file with just the voice audio
+            temp_fallback = tempfile.NamedTemporaryFile(delete=False, suffix='.mp3')
+            temp_fallback.close()
+            fallback_audio.write_audiofile(temp_fallback.name, verbose=False, logger=None)
+            
+            voice_duration = fallback_audio.duration
+            timing_info = {
+                'voice_duration': voice_duration,
+                'cta_start': None,
+                'cta_duration': 0,
+                'total_duration': voice_duration
+            }
+            
+            print(f"✅ Fallback audio created: {temp_fallback.name} ({voice_duration:.2f}s)")
+            return temp_fallback.name, voice_duration, timing_info
+            
+        except Exception as fallback_error:
+            print(f"❌ Fallback audio creation also failed: {fallback_error}")
+            # Last resort - return original file path
+            voice_duration = 0
+            try:
+                fallback_audio = safe_load_audio(voice_audio_path)
+                voice_duration = fallback_audio.duration
+            except:
+                voice_duration = 40.0  # Default fallback
+                
+            timing_info = {
+                'voice_duration': voice_duration,
+                'cta_start': None,
+                'cta_duration': 0,
+                'total_duration': voice_duration
+            }
+            return voice_audio_path, voice_duration, timing_info
 
 
 def transcribe_cta_audio(cta_path, cta_start_time, model_name='base', language='en'):
@@ -164,7 +223,7 @@ def safe_load_audio(path):
     normalized_path = f"{path}_normalized.wav"
     normalize_cmd = [
         'ffmpeg', '-y', '-i', path,
-        '-ar', '48000',    # Standard sample rate
+        '-ar', '44100',    # Standard sample rate (matching video output)
         '-ac', '2',        # Stereo
         '-c:a', 'pcm_s16le',  # Uncompressed audio for better quality
         '-filter:a', 'volume=2.0',  # Boost volume
@@ -248,3 +307,151 @@ def compress_audio(input_path, max_size_mb=0.5):
         print(f"⚠️ Audio compression failed: {e}")
     
     return input_path
+
+
+def load_voiceover(path):
+    """Load voiceover audio file"""
+    from config import MOVIEPY_AVAILABLE
+    
+    if not MOVIEPY_AVAILABLE:
+        raise Exception("MoviePy not available")
+    
+    from moviepy.editor import AudioFileClip
+    
+    try:
+        voiceover = safe_load_audio(path)
+        print(f"✅ Voiceover loaded: {voiceover.duration:.2f}s")
+        return voiceover
+    except Exception as e:
+        print(f"❌ Failed to load voiceover: {e}")
+        raise
+
+
+def load_bgm(path, duration, volume=0.2):
+    """
+    Load background music, loop/trim to duration, and adjust volume
+    
+    Args:
+        path (str): Path to BGM file
+        duration (float): Target duration in seconds
+        volume (float): Volume multiplier (default 0.2 for medium volume)
+        
+    Returns:
+        AudioFileClip: Processed BGM audio clip
+    """
+    from config import MOVIEPY_AVAILABLE
+    
+    if not MOVIEPY_AVAILABLE:
+        raise Exception("MoviePy not available")
+    
+    from moviepy.editor import AudioFileClip, concatenate_audioclips
+    
+    try:
+        bgm_audio = AudioFileClip(path)
+        
+        # Loop BGM to match target duration if needed
+        if bgm_audio.duration < duration:
+            loops_needed = int(duration / bgm_audio.duration) + 1
+            bgm_looped = concatenate_audioclips([bgm_audio] * loops_needed)
+            bgm_final = bgm_looped.subclip(0, duration)
+        else:
+            bgm_final = bgm_audio.subclip(0, duration)
+        
+        # Adjust volume for medium background level
+        bgm_final = bgm_final.volumex(volume)
+        
+        print(f"✅ BGM loaded and processed: {bgm_audio.duration:.2f}s -> {duration:.2f}s, volume: {volume}")
+        return bgm_final
+        
+    except Exception as e:
+        print(f"❌ Failed to load BGM: {e}")
+        raise
+
+
+def load_cta(path):
+    """Load call-to-action audio file"""
+    from config import MOVIEPY_AVAILABLE
+    
+    if not MOVIEPY_AVAILABLE:
+        raise Exception("MoviePy not available")
+    
+    from moviepy.editor import AudioFileClip
+    
+    try:
+        cta = safe_load_audio(path)
+        print(f"✅ CTA loaded: {cta.duration:.2f}s")
+        return cta
+    except Exception as e:
+        print(f"❌ Failed to load CTA: {e}")
+        raise
+
+
+def merge_audio(voiceover_clip, bgm_clip, cta_clip=None):
+    """
+    Merge voiceover + BGM, optionally append CTA after voiceover
+    
+    Args:
+        voiceover_clip: AudioFileClip with voiceover audio
+        bgm_clip: AudioFileClip with background music
+        cta_clip: Optional AudioFileClip with call-to-action audio
+        
+    Returns:
+        tuple: (final_audio_clip, timing_info)
+    """
+    from config import MOVIEPY_AVAILABLE
+    
+    if not MOVIEPY_AVAILABLE:
+        raise Exception("MoviePy not available")
+    
+    from moviepy.editor import CompositeAudioClip, concatenate_audioclips
+    
+    try:
+        voiceover_duration = voiceover_clip.duration
+        
+        # Create composite of voiceover and BGM
+        composite_audio = CompositeAudioClip([voiceover_clip, bgm_clip])
+        # Ensure fps is properly set for composite audio
+        try:
+            if hasattr(voiceover_clip, 'fps') and voiceover_clip.fps:
+                composite_audio.fps = voiceover_clip.fps
+            else:
+                composite_audio.fps = 44100
+        except Exception as fps_error:
+            print(f"⚠️ Setting fps for composite audio: {fps_error}")
+            composite_audio.fps = 44100
+        
+        # Add CTA at the end if provided
+        if cta_clip:
+            final_audio = concatenate_audioclips([composite_audio, cta_clip])
+            # Ensure fps is set for concatenated audio
+            try:
+                if hasattr(voiceover_clip, 'fps') and voiceover_clip.fps:
+                    final_audio.fps = voiceover_clip.fps
+                else:
+                    final_audio.fps = 44100
+            except Exception as fps_error:
+                print(f"⚠️ Setting fps for final audio: {fps_error}")
+                final_audio.fps = 44100
+                
+            cta_start = voiceover_duration
+            total_duration = final_audio.duration
+            print(f"✅ Audio merged: {voiceover_duration:.2f}s voice + BGM + {cta_clip.duration:.2f}s CTA = {total_duration:.2f}s total")
+        else:
+            final_audio = composite_audio
+            cta_start = None
+            total_duration = final_audio.duration
+            print(f"✅ Audio merged: {voiceover_duration:.2f}s voice + BGM = {total_duration:.2f}s total")
+        
+        # Create timing info
+        timing_info = {
+            'voice_duration': voiceover_duration,
+            'cta_start': cta_start,
+            'cta_duration': cta_clip.duration if cta_clip else 0,
+            'total_duration': total_duration
+        }
+        
+        return final_audio, timing_info
+        
+    except Exception as e:
+        print(f"❌ Failed to merge audio: {e}")
+        raise

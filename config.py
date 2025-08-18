@@ -107,5 +107,17 @@ except ImportError as e:
 A4F_API_KEY = "ddc-a4f-cc235b79cf914f809db73076609704cc"
 A4F_API_URL = "https://api.a4f.co/v1/audio/transcriptions"
 
+# Force local Whisper usage (disable A4F API fallback)
+FORCE_LOCAL_WHISPER = True
+
 # Global configuration
 SUBTITLE_SIZE_MULTIPLIER = 0.6  # Medium font size for balanced readability
+
+# Path configuration for random clips feature
+CLIPS_FOLDER = "/Users/techmero/Downloads/Random_clips"
+BGM_FOLDER = "/Users/techmero/Downloads/n8n_video_shorts_creator_yt_techmero/n8n-ffmpeg/video-api/TEST"
+VOICEOVER_FOLDER = "/Users/techmero/Downloads/n8n_video_shorts_creator_yt_techmero/n8n-ffmpeg/video-api/TEST"
+CTA_FOLDER = "/Users/techmero/Downloads/n8n_video_shorts_creator_yt_techmero/n8n-ffmpeg/video-api/TEST"
+
+# Default clip duration for random clips feature
+CLIP_DURATION = 2.0  # seconds

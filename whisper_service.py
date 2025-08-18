@@ -1,7 +1,7 @@
 import requests
 import json
 import traceback
-from config import WHISPER_AVAILABLE, WhisperModel, A4F_API_KEY, A4F_API_URL
+from config import WHISPER_AVAILABLE, WhisperModel, A4F_API_KEY, A4F_API_URL, FORCE_LOCAL_WHISPER
 from audio_service import compress_audio
 
 # Global variables for this module
@@ -38,14 +38,29 @@ def load_whisper_model(model_name="base"):
 def transcribe_with_whisper(audio_path, model_name="base", language=None, task="transcribe"):
     """Transcribe audio using OpenAI Whisper with real timestamps"""
     if not WHISPER_AVAILABLE:
-        print("⚠️ Whisper not available, falling back to A4F API")
-        return transcribe_audio_with_a4f(audio_path)
+        if FORCE_LOCAL_WHISPER:
+            print("❌ Local Whisper forced but not available. Please install faster-whisper.")
+            return None
+        else:
+            print("⚠️ Whisper not available, falling back to A4F API")
+            return transcribe_audio_with_a4f(audio_path)
     
     try:
+        # Check for environment variable override for model size
+        import os
+        env_model = os.environ.get('WHISPER_MODEL_SIZE', model_name)
+        if env_model != model_name:
+            print(f"🔧 Using environment override model: {env_model}")
+            model_name = env_model
+        
         model = load_whisper_model(model_name)
         if not model:
-            print("⚠️ Whisper model loading failed, falling back to A4F API")
-            return transcribe_audio_with_a4f(audio_path)
+            if FORCE_LOCAL_WHISPER:
+                print("❌ Local Whisper forced but model loading failed.")
+                return None
+            else:
+                print("⚠️ Whisper model loading failed, falling back to A4F API")
+                return transcribe_audio_with_a4f(audio_path)
         
         print(f"🎤 Transcribing audio with Whisper {model_name} model...")
         print(f"📁 Audio file: {audio_path}")
@@ -106,8 +121,12 @@ def transcribe_with_whisper(audio_path, model_name="base", language=None, task="
         
     except Exception as e:
         print(f"❌ Whisper transcription failed: {e}")
-        print("🔄 Falling back to A4F API...")
-        return transcribe_audio_with_a4f(audio_path)
+        if FORCE_LOCAL_WHISPER:
+            print("❌ Local Whisper forced - not falling back to A4F API")
+            return None
+        else:
+            print("🔄 Falling back to A4F API...")
+            return transcribe_audio_with_a4f(audio_path)
 
 
 def transcribe_audio_with_a4f(audio_path, max_file_size_mb=0.5):
