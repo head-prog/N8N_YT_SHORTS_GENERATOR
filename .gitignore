@@ -39,7 +39,7 @@ MANIFEST
 ehthumbs.db
 Thumbs.db
 
-# Video files (test outputs)
+# Video files (test outputs) - excluding examples
 *.mp4
 *.avi
 *.mov
@@ -48,6 +48,12 @@ Thumbs.db
 *.mp3
 test_*
 output_*
+
+# But include example files
+!examples/*.mp4
+!examples/*.wav
+!examples/*.mp3
+!examples/test_*
 temp-*
 *_normalized.wav
 *_repaired.wav
