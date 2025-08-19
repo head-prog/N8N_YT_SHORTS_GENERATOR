@@ -1,0 +1,72 @@
+[Script Info]
+Title: Pause-Aware Subtitles
+ScriptType: v4.00+
+
+[V4+ Styles]
+Format: Name, Fontname, Fontsize, PrimaryColour, SecondaryColour, OutlineColour, BackColour, Bold, Italic, Underline, StrikeOut, ScaleX, ScaleY, Spacing, Angle, BorderStyle, Outline, Shadow, Alignment, MarginL, MarginR, MarginV, Encoding
+Style: VoiceOver,Bangers,19,&H00FFFFFF,&H000000FF,&H00000000,&H80000000,1,0,0,0,100,100,0,0,1,3,0,5,0,0,50,1
+Style: CTA,Bangers,19,&H0000FFFF,&H000000FF,&H00000000,&H80000000,1,0,0,0,100,100,0,0,1,3,0,5,0,0,50,1
+
+[Events]
+Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
+Dialogue: 0,0:00:00.00,0:00:00.84,VoiceOver,,0,0,0,,WHEN YOU FEEL
+Dialogue: 0,0:00:00.84,0:00:02.12,VoiceOver,,0,0,0,,INVISIBLE AND ALONE,...
+Dialogue: 0,0:00:02.62,0:00:03.10,VoiceOver,,0,0,0,,LIKE NO ONE
+Dialogue: 0,0:00:03.10,0:00:04.02,VoiceOver,,0,0,0,,TRULY SEES YOUR
+Dialogue: 0,0:00:04.02,0:00:04.40,VoiceOver,,0,0,0,,HEART.
+Dialogue: 0,0:00:04.84,0:00:05.88,VoiceOver,,0,0,0,,THE BIBLE SAYS,...
+Dialogue: 0,0:00:06.32,0:00:06.74,VoiceOver,,0,0,0,,THE LORD IS
+Dialogue: 0,0:00:06.74,0:00:07.32,VoiceOver,,0,0,0,,CLOSE TO THE
+Dialogue: 0,0:00:07.32,0:00:08.52,VoiceOver,,0,0,0,,BROKEN HEARTED AND
+Dialogue: 0,0:00:08.52,0:00:09.48,VoiceOver,,0,0,0,,SAVES THOSE WHO
+Dialogue: 0,0:00:09.48,0:00:09.96,VoiceOver,,0,0,0,,ARE CRUSHED
+Dialogue: 0,0:00:09.96,0:00:10.56,VoiceOver,,0,0,0,,IN SPIRIT.
+Dialogue: 0,0:00:11.48,0:00:12.66,VoiceOver,,0,0,0,,PSALM 34 -18.
+Dialogue: 0,0:00:13.62,0:00:14.80,VoiceOver,,0,0,0,,IMAGINE SITTING QUIETLY
+Dialogue: 0,0:00:14.80,0:00:15.74,VoiceOver,,0,0,0,,IN YOUR ROOM,...
+Dialogue: 0,0:00:16.10,0:00:17.06,VoiceOver,,0,0,0,,THE SILENCE WRAPPING
+Dialogue: 0,0:00:17.06,0:00:17.76,VoiceOver,,0,0,0,,AROUND YOU LIKE
+Dialogue: 0,0:00:17.76,0:00:18.54,VoiceOver,,0,0,0,,A HEAVY BLANKET.
+Dialogue: 0,0:00:19.24,0:00:20.00,VoiceOver,,0,0,0,,YOU REACH OUT,...
+Dialogue: 0,0:00:20.36,0:00:20.82,VoiceOver,,0,0,0,,BUT NO ONE
+Dialogue: 0,0:00:20.82,0:00:21.22,VoiceOver,,0,0,0,,ANSWERS.
+Dialogue: 0,0:00:21.82,0:00:22.14,VoiceOver,,0,0,0,,YET,...
+Dialogue: 0,0:00:22.58,0:00:23.10,VoiceOver,,0,0,0,,RIGHT THERE,...
+Dialogue: 0,0:00:23.56,0:00:24.46,VoiceOver,,0,0,0,,GOD'S PRESENCE IS
+Dialogue: 0,0:00:24.46,0:00:24.76,VoiceOver,,0,0,0,,NEAR,...
+Dialogue: 0,0:00:25.34,0:00:26.64,VoiceOver,,0,0,0,,QUIETLY COMFORTING EVERY
+Dialogue: 0,0:00:26.64,0:00:27.46,VoiceOver,,0,0,0,,ACHE AND WHISPERING
+Dialogue: 0,0:00:27.46,0:00:27.92,VoiceOver,,0,0,0,,PEACE
+Dialogue: 0,0:00:27.92,0:00:28.66,VoiceOver,,0,0,0,,TO YOUR SOUL.
+Dialogue: 0,0:00:28.66,0:00:30.12,VoiceOver,,0,0,0,,EVEN IN MOMENTS
+Dialogue: 0,0:00:30.12,0:00:31.10,VoiceOver,,0,0,0,,WHEN LONELINESS FEELS
+Dialogue: 0,0:00:31.10,0:00:31.80,VoiceOver,,0,0,0,,OVERWHELMING,...
+Dialogue: 0,0:00:32.26,0:00:33.26,VoiceOver,,0,0,0,,HIS PROMISE REMINDS
+Dialogue: 0,0:00:33.26,0:00:33.86,VoiceOver,,0,0,0,,US YOU ARE
+Dialogue: 0,0:00:33.86,0:00:35.04,VoiceOver,,0,0,0,,NEVER TRULY ALONE.
+Dialogue: 0,0:00:35.64,0:00:36.34,VoiceOver,,0,0,0,,HIS LOVE IS
+Dialogue: 0,0:00:36.34,0:00:37.40,VoiceOver,,0,0,0,,A CONSTANT TENDER
+Dialogue: 0,0:00:37.40,0:00:37.88,VoiceOver,,0,0,0,,EMBRACE.
+Dialogue: 0,0:00:38.54,0:00:38.96,VoiceOver,,0,0,0,,SO,...
+Dialogue: 0,0:00:39.24,0:00:39.98,VoiceOver,,0,0,0,,WHEN THE WORLD...
+Dialogue: 0,0:00:40.00,0:00:40.40,CTA,,0,0,0,,IF YOU REALLY
+Dialogue: 0,0:00:40.40,0:00:41.14,CTA,,0,0,0,,BELIEVE IN GOD'S
+Dialogue: 0,0:00:41.14,0:00:41.38,CTA,,0,0,0,,MERCY,...
+Dialogue: 0,0:00:41.66,0:00:42.22,CTA,,0,0,0,,LISTEN CAREFULLY.
+Dialogue: 0,0:00:42.64,0:00:42.90,CTA,,0,0,0,,TOMORROW,...
+Dialogue: 0,0:00:43.30,0:00:43.86,CTA,,0,0,0,,A LIFE -CHANGING
+Dialogue: 0,0:00:43.86,0:00:44.52,CTA,,0,0,0,,PRAYER IS BEING
+Dialogue: 0,0:00:44.52,0:00:44.88,CTA,,0,0,0,,SHARED,
+Dialogue: 0,0:00:45.10,0:00:45.44,CTA,,0,0,0,,BUT IF YOU'RE
+Dialogue: 0,0:00:45.44,0:00:46.30,CTA,,0,0,0,,NOT FOLLOWING GOD'S
+Dialogue: 0,0:00:46.30,0:00:46.60,CTA,,0,0,0,,MESSAGES,...
+Dialogue: 0,0:00:47.06,0:00:47.58,CTA,,0,0,0,,YOU'LL MISS IT.
+Dialogue: 0,0:00:47.76,0:00:48.22,CTA,,0,0,0,,THIS MIGHT BE
+Dialogue: 0,0:00:48.22,0:00:48.86,CTA,,0,0,0,,THE REMINDER YOUR
+Dialogue: 0,0:00:48.86,0:00:49.38,CTA,,0,0,0,,HEART HAS BEEN
+Dialogue: 0,0:00:49.38,0:00:50.04,CTA,,0,0,0,,CRYING OUT FOR.
+Dialogue: 0,0:00:50.34,0:00:50.98,CTA,,0,0,0,,FOLLOW NOW,...
+Dialogue: 0,0:00:51.20,0:00:51.58,CTA,,0,0,0,,SO YOU DON'T
+Dialogue: 0,0:00:51.58,0:00:52.08,CTA,,0,0,0,,MISS WHAT GOD
+Dialogue: 0,0:00:52.08,0:00:52.74,CTA,,0,0,0,,HAS PLANNED FOR
+Dialogue: 0,0:00:52.74,0:00:52.92,CTA,,0,0,0,,YOU.

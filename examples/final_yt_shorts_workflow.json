@@ -1,5 +1,4 @@
 {
-  "name": "final_yt_shorts_workflow",
   "nodes": [
     {
       "parameters": {
@@ -92,13 +91,11 @@
       "name": "✍️ AI Script Generator"
     },
     {
-      "parameters": {
-        "numberInputs": 4
-      },
+      "parameters": {},
       "type": "n8n-nodes-base.merge",
       "typeVersion": 3.2,
       "position": [
-        -720,
+        -512,
         16
       ],
       "id": "8d36aeb2-bc11-4cdf-9a12-e2862efae215",
@@ -113,7 +110,7 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        -496,
+        -288,
         48
       ]
     },
@@ -207,7 +204,7 @@
           "parameters": [
             {
               "name": "text",
-              "value": "={{ $json.script_text || 'Default text' }}"
+              "value": "={{ $json.cleaned_script }}"
             },
             {
               "name": "voice",
@@ -227,8 +224,8 @@
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
       "position": [
-        -944,
-        172
+        -736,
+        176
       ],
       "id": "37971c36-b846-49b3-a033-867707899dd1",
       "name": "🎙️ TTS Conversion1",
@@ -345,22 +342,27 @@
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
       "position": [
-        -272,
+        -64,
         48
       ],
       "id": "c4fbedcf-3801-445f-b77e-f4d42cea9641",
       "name": "🎥 Generate Video via API2"
+    },
+    {
+      "parameters": {
+        "jsCode": "// --- Utility Functions (same as before) ---\nfunction cleanScriptForTTS(text) {\n    if (!text || typeof text !== 'string') {\n        return '';\n    }\n\n    text = text.replace(/:/g, ' ');\n    const replacements = {\n        '—': ',', '–': ',', '…': ',', ';': ',',\n        '\"': '', '“': '', '”': '', \"'\": \"'\", '‘': \"'\", '’': \"'\",\n        '(': ',', ')': ',', '[': ',', ']': ',', '{': ',', '}': ',',\n        '/': ' or ', '\\\\': ' ', '*': '', '#': '', '@': ' at ', '&': ' and ',\n        '%': ' percent ', '$': ' dollars ', '€': ' euros ', '£': ' pounds ',\n        '¥': ' yen ', '©': '', '®': '', '™': '', '§': ' section ', '¶': '',\n        '†': '', '‡': '', '•': ',', '◦': ',', '▪': ',', '▫': ',', '‣': ',', '⁃': ','\n    };\n\n    for (const [oldChar, newChar] of Object.entries(replacements)) {\n        text = text.replace(new RegExp(oldChar.replace(/[.*+?^${}()|[\\]\\\\]/g, '\\\\$&'), 'g'), newChar);\n    }\n\n    text = text.replace(/\\b(\\d+)\\s*:\\s*(\\d+)\\b/g, '$1 $2');\n    text = text.replace(/,+/g, ',');\n    text = text.replace(/^\\s*,+\\s*/, '');\n    text = text.replace(/\\.\\s*,+\\s*/g, '. ');\n    text = text.replace(/\\s*,\\s*/g, ', ');\n    text = text.replace(/\\s*\\.\\s*/g, '. ');\n    text = text.replace(/\\s*\\?\\s*/g, '? ');\n    text = text.replace(/\\s*!\\s*/g, '! ');\n    text = text.replace(/\\s+/g, ' ').trim();\n    text = text.replace(/,+\\s*([.!?])/g, '$1');\n\n    if (text && !text.match(/[.!?]$/)) {\n        text += '.';\n    }\n    return text;\n}\n\n// --- Main Execution for n8n ---\nconst inputData = $input.first().json;\nconst scriptData = inputData.selected_script || {};\nconst voiceScript = scriptData.voice_script || scriptData.script_text || '';\n\nconst cleanedScript = cleanScriptForTTS(voiceScript);\n\n// ✅ Must return array of objects in n8n\nreturn [\n  {\n    json: {\n      original_script: voiceScript,\n      cleaned_script: cleanedScript,\n      original_length: voiceScript.length,\n      cleaned_length: cleanedScript.length,\n      word_count: cleanedScript.split(' ').filter(w => w.length > 0).length,\n      timestamp: new Date().toISOString()\n    }\n  }\n];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -960,
+        176
+      ],
+      "id": "e2df0b49-41a3-496f-ace5-1ff124016b66",
+      "name": "Code",
+      "alwaysOutputData": true
     }
   ],
-  "pinData": {
-    "✍️ AI Script Generator": [
-      {
-        "json": {
-          "output": "{\n  \"scripts\": [\n    {\n      \"title\": \"Never Truly Alone: God’s Comfort in Loneliness\",\n      \"theme\": \"Loneliness → Comfort and Hope\",\n      \"voice_script\": \"When you feel invisible and alone, like no one truly sees your heart... The Bible says, “The Lord is close to the brokenhearted and saves those who are crushed in spirit.” — Psalm 34:18. Imagine sitting quietly in your room, the silence wrapping around you like a heavy blanket. You reach out, but no one answers. Yet, right there, God’s presence is near, quietly comforting every ache and whispering peace to your soul. Even in moments when loneliness feels overwhelming, His promise reminds us: you are never truly alone. His love is a constant, tender embrace. So, when the world feels distant, remember — the God who holds the universe also holds your heart, close and tender.\",\n      \"visual_tips\": \"Start with a close-up of a person sitting alone in a softly lit room, looking down. Cut to serene nature scenes (gentle sunrise, calm water). Show subtle imagery of light or warmth spreading around them. End with a peaceful smile and a gentle sunbeam through a window.\",\n      \"hook_strength\": \"High\",\n      \"estimated_duration\": \"55\",\n      \"key_scripture\": \"Psalm 34:18\",\n      \"engagement_score\": 9\n    }\n  ]\n}"
-        }
-      }
-    ]
-  },
   "connections": {
     "📝 Form Trigger": {
       "main": [
@@ -455,7 +457,7 @@
       "main": [
         [
           {
-            "node": "🎙️ TTS Conversion1",
+            "node": "Code",
             "type": "main",
             "index": 0
           }
@@ -468,7 +470,7 @@
           {
             "node": "🔗 Merge All Data",
             "type": "main",
-            "index": 3
+            "index": 1
           }
         ]
       ]
@@ -483,17 +485,28 @@
           }
         ]
       ]
+    },
+    "Code": {
+      "main": [
+        [
+          {
+            "node": "🎙️ TTS Conversion1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     }
   },
-  "active": false,
-  "settings": {
-    "executionOrder": "v1"
+  "pinData": {
+    "✍️ AI Script Generator": [
+      {
+        "output": "{\n  \"scripts\": [\n    {\n      \"title\": \"Never Truly Alone: God’s Comfort in Loneliness\",\n      \"theme\": \"Loneliness → Comfort and Hope\",\n      \"voice_script\": \"When you feel invisible and alone, like no one truly sees your heart... The Bible says, “The Lord is close to the brokenhearted and saves those who are crushed in spirit.” — Psalm 34:18. Imagine sitting quietly in your room, the silence wrapping around you like a heavy blanket. You reach out, but no one answers. Yet, right there, God’s presence is near, quietly comforting every ache and whispering peace to your soul. Even in moments when loneliness feels overwhelming, His promise reminds us: you are never truly alone. His love is a constant, tender embrace. So, when the world feels distant, remember — the God who holds the universe also holds your heart, close and tender.\",\n      \"visual_tips\": \"Start with a close-up of a person sitting alone in a softly lit room, looking down. Cut to serene nature scenes (gentle sunrise, calm water). Show subtle imagery of light or warmth spreading around them. End with a peaceful smile and a gentle sunbeam through a window.\",\n      \"hook_strength\": \"High\",\n      \"estimated_duration\": \"55\",\n      \"key_scripture\": \"Psalm 34:18\",\n      \"engagement_score\": 9\n    }\n  ]\n}"
+      }
+    ]
   },
-  "versionId": "30d1f2ac-23b7-440c-87a2-bc4570ba7f2e",
   "meta": {
     "templateCredsSetupCompleted": true,
     "instanceId": "33baa129ea910aca249a999488d75355108fcb8a1227dfcf3361e21c6b28f891"
-  },
-  "id": "4KH2ji9I360MpH5Y",
-  "tags": []
+  }
 }
