@@ -209,6 +209,7 @@ For issues and questions:
 
 ### Example Output Video
 Check out `examples/test_final_volume_fix.mp4` for a sample generated video showcasing:
+![VIDEO EXAMPLE](/test_final_volume_fix.mp4)
 - ✅ Perfect subtitle centering for mobile viewing
 - ✅ Balanced audio mixing (voice, BGM, CTA)
 - ✅ Smooth transitions between random clips
@@ -217,7 +218,7 @@ Check out `examples/test_final_volume_fix.mp4` for a sample generated video show
 
 ### N8N Workflow Integration
 
-![N8N Workflow](examples/n8n_workflow_screenshot.png)
+![N8N Workflow](/Screenshot 2025-08-19 at 11.45.03 AM.png)
 
 The repository includes a complete N8N workflow (`examples/final_yt_shorts_workflow.json`) that demonstrates:
 - **Form Trigger**: Collects user input for video generation
