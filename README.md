@@ -108,6 +108,9 @@ video-api/
     ├── VOICE_AUDIO.wav
     ├── BGM.mp3
     └── CTA.mp3
+├── examples/                  # Example outputs and workflows
+│   ├── test_final_volume_fix.mp4      # Example generated video
+│   └── final_yt_shorts_workflow.json  # N8N workflow configuration
 ```
 
 ## 🔄 API Endpoints
@@ -210,6 +213,26 @@ The system generates professional YouTube Shorts with:
 - ✅ Smooth transitions between random clips
 - ✅ Word-perfect synchronization
 - ✅ High-quality output optimized for social media
+
+### Example Output
+
+- **`test_final_volume_fix.mp4`**: Sample generated video showcasing all features including the latest BGM/CTA volume improvements
+- **`final_yt_shorts_workflow.json`**: Complete N8N workflow configuration for automated video generation
+
+## 🔧 N8N Integration
+
+The included N8N workflow (`final_yt_shorts_workflow.json`) provides:
+- Automated video generation triggers
+- File upload handling
+- API integration with the Flask server
+- Error handling and notifications
+- Batch processing capabilities
+
+To use the N8N workflow:
+1. Import `final_yt_shorts_workflow.json` into your N8N instance
+2. Configure the API endpoint URL
+3. Set up your file input sources
+4. Activate the workflow
 
 ---
 

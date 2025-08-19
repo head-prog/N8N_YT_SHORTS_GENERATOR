@@ -1,0 +1,499 @@
+{
+  "name": "final_yt_shorts_workflow",
+  "nodes": [
+    {
+      "parameters": {
+        "jsCode": "// Simple error handler\nreturn {\n  json: {\n    error: true,\n    message: 'Validation failed: Missing required prompt, BGM, or CTA audio fields',\n    timestamp: new Date().toISOString()\n  }\n};"
+      },
+      "id": "0b6c48a5-00de-4035-9a62-73261fa151d5",
+      "name": "❌ Error Handler",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -1744,
+        364
+      ]
+    },
+    {
+      "parameters": {
+        "formTitle": "YT Shorts Generator - Audio Only",
+        "formDescription": "Generate YouTube Shorts with AI script, TTS voiceover, and audio mixing. Background video will be generated automatically.",
+        "formFields": {
+          "values": [
+            {
+              "fieldLabel": "Add Your Prompt",
+              "placeholder": "Enter your video topic (e.g., 'faith and hope inspiration')",
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "Audio_Bgm",
+              "fieldType": "file",
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "Audio_cta",
+              "fieldType": "file",
+              "requiredField": true
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.formTrigger",
+      "typeVersion": 2.2,
+      "position": [
+        -2416,
+        144
+      ],
+      "id": "86431481-1c09-491f-8703-eb8461f17d43",
+      "name": "📝 Form Trigger",
+      "webhookId": "fd3c4d22-1915-4a09-8e5c-ab1f90c04f71"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "gpt-4.1-mini-ca",
+          "mode": "list",
+          "cachedResultName": "gpt-4.1-mini-ca"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        -1448,
+        396
+      ],
+      "id": "d5bc87c6-f084-48bb-80d4-6aa8dc901b0b",
+      "name": "OpenAI Chat Model",
+      "credentials": {
+        "openAiApi": {
+          "id": "2zaOZEyU0ebt2Isf",
+          "name": "CHATANYWHERE"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Create 1 compelling Christian YouTube Shorts script for the topic: {{ $json.prompt || 'faith and hope inspiration' }}\n\nSTRICT REQUIREMENTS:\n\nStart with \"The Bible says...\" followed by an actual Bible verse text\n\nHook viewers in first 3–5 seconds with relatable struggle/emotion\n\nMaximum 1200 characters for entire script (approx. 1 minute spoken)\n\nNatural, conversational tone (like talking to a friend)\n\nShow emotional transformation (struggle → hope)\n\nInclude specific, relevant Bible verse\n\nEnd with encouragement, NO calls-to-action\n\nTarget duration: 50-60 seconds when spoken\n\nTOPIC TO ADDRESS: {{ $json.prompt || 'faith and hope inspiration' }}\n\nEMOTIONAL STRUCTURE:\n\nHOOK (0-5 sec): \"When you feel [relatable struggle]...\"\n\nBRIDGE (5-12 sec): \"The Bible says [specific verse with reference]\"\n\nSTORY (12-45 sec): Brief scenario/application with vivid detail\n\nTRANSFORM (45-60 sec): Hopeful, empowering conclusion\n\nEXAMPLE STYLES:\n\nAnxiety: \"When anxiety steals your peace...\"\n\nLoneliness: \"Feeling forgotten by everyone...\"\n\nFear: \"That decision you're afraid to make...\"\n\nDoubt: \"When you question if God cares...\"\n\nOUTPUT REQUIREMENTS:\n\nReturn ONLY valid JSON in this exact format:\n\n{\n\"scripts\": [\n{\n\"title\": \"Script Title Here\",\n\"theme\": \"Topic → Transformation\",\n\"voice_script\": \"Complete script text here under 1200 characters\",\n\"visual_tips\": \"Suggested visuals for video\",\n\"hook_strength\": \"High/Medium/Low\",\n\"estimated_duration\": \"60\",\n\"key_scripture\": \"Bible Reference\",\n\"engagement_score\": 8\n}\n]\n}\n\nvoice_script must be complete, flowing narrative\n\nInclude relevant visual suggestions\n\nEstimate realistic duration\n\nRate engagement potential 1-10",
+        "options": {
+          "systemMessage": "=You are an expert Christian content scriptwriter specializing in creating viral YouTube Shorts that inspire faith and hope.\n\nCORE EXPERTISE:\n\nEmotional storytelling that hooks viewers instantly\n\nSeamless, natural integration of specific Bible verses\n\nOptimized short-form scripts for maximum engagement and clarity\n\nCreating transformational narratives from struggle to hope\n\nCRITICAL RULES:\n\nAlways start scripts with \"The Bible says...\" followed by an actual Bible verse and its reference (no generic verses).\n\nKeep total script under 1200 characters for about 50–60 seconds spoken duration.\n\nFocus on one clear emotional transformation (e.g., anxiety → peace, doubt → faith).\n\nUse a warm, conversational tone, like talking to a close friend (avoid preachy language).\n\nEnd with uplifting encouragement — never include calls-to-action.\n\nFollow the structure:\n\nHook (5 sec): relatable struggle/emotion\n\nBible Promise (7 sec): relevant verse with reference\n\nStory/Application (30 sec): brief real-life example or scenario with vivid detail\n\nHopeful Close (15 sec): emotional transformation and encouragement\n\nOUTPUT FORMAT:\nAlways return a valid JSON object with a \"scripts\" array containing exactly one script object with these fields:\n\ntitle — concise, compelling title\n\ntheme — clear theme and transformation\n\nvoice_script — full script text, under 1200 characters\n\nvisual_tips — suggested visuals to match the script\n\nhook_strength — High, Medium, or Low\n\nestimated_duration — in seconds, 50–60 seconds\n\nkey_scripture — Bible verse reference used\n\nengagement_score — rate 1 to 10 based on viral potential and emotional impact\n\nREMINDER:\nCreate content that transforms hearts, not just garners views. Every word should count for eternal impact."
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2.1,
+      "position": [
+        -1520,
+        172
+      ],
+      "id": "40de86d7-7cda-484b-84aa-1c555b7e955a",
+      "name": "✍️ AI Script Generator"
+    },
+    {
+      "parameters": {
+        "numberInputs": 4
+      },
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        -720,
+        16
+      ],
+      "id": "8d36aeb2-bc11-4cdf-9a12-e2862efae215",
+      "name": "🔗 Merge All Data"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Prepare data for video generation API\nconst inputData = $input.all();\nconsole.log('=== MERGE PROCESSOR ===');\n\n// Initialize result object\nlet result = {\n  json: {},\n  binary: {}\n};\n\n// Process each input item\ninputData.forEach((item, index) => {\n  console.log(`Processing item ${index}:`, Object.keys(item.json || {}), Object.keys(item.binary || {}));\n  \n  // Merge JSON data\n  if (item.json) {\n    result.json = { ...result.json, ...item.json };\n  }\n  \n  // Merge binary data\n  if (item.binary) {\n    result.binary = { ...result.binary, ...item.binary };\n  }\n});\n\n// Log final structure\nconsole.log('Final JSON keys:', Object.keys(result.json));\nconsole.log('Final binary keys:', Object.keys(result.binary));\n\n// Ensure we have all required fields\nconst requiredBinaryFields = ['Audio_Bgm', 'Audio_cta', 'audio_file'];\nconst missingFields = requiredBinaryFields.filter(field => !result.binary[field]);\n\nif (missingFields.length > 0) {\n  throw new Error(`Missing binary fields: ${missingFields.join(', ')}`);\n}\n\nreturn result;"
+      },
+      "id": "f372cb2c-3cb5-4f21-ab53-2f6ef3e98fef",
+      "name": "🔄 Merge Processor",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -496,
+        48
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 1
+          },
+          "conditions": [
+            {
+              "id": "has-prompt",
+              "leftValue": "={{ $json.prompt }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "isNotEmpty"
+              }
+            },
+            {
+              "id": "has-bgm",
+              "leftValue": "={{ $json.bgm_url }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "notEmpty",
+                "singleValue": true
+              }
+            },
+            {
+              "id": "has-cta",
+              "leftValue": "={{ $json.cta_url }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "notEmpty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "or"
+        },
+        "options": {}
+      },
+      "id": "d9b45970-a87d-4e1c-92cd-dc1f8068b4b5",
+      "name": "✅ Validate Input1",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [
+        -1968,
+        268
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Access input from Manual Trigger or previous node\nconst input = $input.item.json;\n\n// Optional: fallback/default values\nconst defaults = {\n  prompt: 'faith and hope inspiration',\n  cta_url: '',\n  bgm_url: ''\n};\n\n// Merge the input with defaults\nconst processedData = {\n  prompt: input.prompt || defaults.prompt,\n  cta_url: input.cta_url || defaults.cta_url,\n  bgm_url: input.bgm_url || defaults.bgm_url,\n  timestamp: new Date().toISOString()\n};\n\n// Debugging\nconsole.log('=== DATA PROCESSOR ===');\nconsole.log('Prompt:', processedData.prompt);\nconsole.log('CTA URL:', processedData.cta_url);\nconsole.log('BGM URL:', processedData.bgm_url);\n\n// Return the processed result\nreturn {\n  json: processedData\n};"
+      },
+      "id": "9e4eb4ed-b967-4867-bdc5-8c146b8869b4",
+      "name": "🔧 Data Processor1",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -1744,
+        172
+      ],
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "jsCode": "// Parse AI script output\nconst inputData = $input.first().json;\nconsole.log('=== SCRIPT PARSER START ===');\n\nlet scriptOutput;\nif (inputData.output) {\n  scriptOutput = typeof inputData.output === 'string' ? JSON.parse(inputData.output) : inputData.output;\n} else {\n  scriptOutput = inputData;\n}\n\nif (!scriptOutput.scripts || !scriptOutput.scripts[0]) {\n  throw new Error('No scripts found in AI output');\n}\n\nconst script = scriptOutput.scripts[0];\nconst scriptText = script.voice_script;\n\nif (!scriptText || scriptText.length < 10) {\n  throw new Error('Script text too short or missing');\n}\n\nconst result = {\n  success: true,\n  selected_script: script,\n  script_text: scriptText,\n  processing_info: {\n    script_length: scriptText.length,\n    word_count: scriptText.split(' ').length,\n    timestamp: new Date().toISOString()\n  }\n};\n\nconsole.log('✅ Script parsed successfully');\nconsole.log('Title:', script.title);\nconsole.log('Length:', scriptText.length);\n\nreturn {\n  json: result\n};"
+      },
+      "id": "031b3642-b3ac-464b-9707-cbbc07b7612b",
+      "name": "📝 Script Parser1",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -1168,
+        172
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://192.168.0.113:8000/generate",
+        "sendBody": true,
+        "contentType": "form-urlencoded",
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "text",
+              "value": "={{ $json.script_text || 'Default text' }}"
+            },
+            {
+              "name": "voice",
+              "value": "hank.wav"
+            }
+          ]
+        },
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "file",
+              "outputPropertyName": "audio_file"
+            }
+          }
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -944,
+        172
+      ],
+      "id": "37971c36-b846-49b3-a033-867707899dd1",
+      "name": "🎙️ TTS Conversion1",
+      "retryOnFail": false
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1enELDZs1mJogylegA9g0ZChaX_mNc_8QTPGqnSXlfQw",
+          "mode": "list",
+          "cachedResultName": "yt_short_cr"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 1963092001,
+          "mode": "list",
+          "cachedResultName": "Sheet1"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "cta_url": "={{ $json.Audio_cta[0].filename }}",
+            "bgm_url": "={{ $json.Audio_Bgm[0].filename }}",
+            "prompt": "={{ $json['Add Your Prompt'] }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "cta_url",
+              "displayName": "cta_url",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "bgm_url",
+              "displayName": "bgm_url",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "prompt",
+              "displayName": "prompt",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.6,
+      "position": [
+        -2192,
+        268
+      ],
+      "id": "d8b8fc9a-125d-4e9c-8180-b4a162bea360",
+      "name": "📄 Fetch Content Config1",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "w1UfBLP9twU3Hozz",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://192.168.0.115:5009/generate-video-with-random-clips",
+        "sendBody": true,
+        "contentType": "multipart-form-data",
+        "bodyParameters": {
+          "parameters": [
+            {
+              "parameterType": "formBinaryData",
+              "name": "bgm",
+              "inputDataFieldName": "Audio_Bgm"
+            },
+            {
+              "parameterType": "formBinaryData",
+              "name": "cta",
+              "inputDataFieldName": "Audio_cta"
+            },
+            {
+              "parameterType": "formBinaryData",
+              "name": "voiceover",
+              "inputDataFieldName": "audio_file"
+            },
+            {
+              "name": "add_subtitles",
+              "value": "true"
+            }
+          ]
+        },
+        "options": {
+          "response": {
+            "response": {}
+          },
+          "timeout": 300000
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -272,
+        48
+      ],
+      "id": "c4fbedcf-3801-445f-b77e-f4d42cea9641",
+      "name": "🎥 Generate Video via API2"
+    }
+  ],
+  "pinData": {
+    "✍️ AI Script Generator": [
+      {
+        "json": {
+          "output": "{\n  \"scripts\": [\n    {\n      \"title\": \"Never Truly Alone: God’s Comfort in Loneliness\",\n      \"theme\": \"Loneliness → Comfort and Hope\",\n      \"voice_script\": \"When you feel invisible and alone, like no one truly sees your heart... The Bible says, “The Lord is close to the brokenhearted and saves those who are crushed in spirit.” — Psalm 34:18. Imagine sitting quietly in your room, the silence wrapping around you like a heavy blanket. You reach out, but no one answers. Yet, right there, God’s presence is near, quietly comforting every ache and whispering peace to your soul. Even in moments when loneliness feels overwhelming, His promise reminds us: you are never truly alone. His love is a constant, tender embrace. So, when the world feels distant, remember — the God who holds the universe also holds your heart, close and tender.\",\n      \"visual_tips\": \"Start with a close-up of a person sitting alone in a softly lit room, looking down. Cut to serene nature scenes (gentle sunrise, calm water). Show subtle imagery of light or warmth spreading around them. End with a peaceful smile and a gentle sunbeam through a window.\",\n      \"hook_strength\": \"High\",\n      \"estimated_duration\": \"55\",\n      \"key_scripture\": \"Psalm 34:18\",\n      \"engagement_score\": 9\n    }\n  ]\n}"
+        }
+      }
+    ]
+  },
+  "connections": {
+    "📝 Form Trigger": {
+      "main": [
+        [
+          {
+            "node": "📄 Fetch Content Config1",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "🔗 Merge All Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "✍️ AI Script Generator",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "✍️ AI Script Generator": {
+      "main": [
+        [
+          {
+            "node": "📝 Script Parser1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "🔗 Merge All Data": {
+      "main": [
+        [
+          {
+            "node": "🔄 Merge Processor",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "🔄 Merge Processor": {
+      "main": [
+        [
+          {
+            "node": "🎥 Generate Video via API2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "✅ Validate Input1": {
+      "main": [
+        [
+          {
+            "node": "🔧 Data Processor1",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "❌ Error Handler",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "🔧 Data Processor1": {
+      "main": [
+        [
+          {
+            "node": "✍️ AI Script Generator",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "📝 Script Parser1": {
+      "main": [
+        [
+          {
+            "node": "🎙️ TTS Conversion1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "🎙️ TTS Conversion1": {
+      "main": [
+        [
+          {
+            "node": "🔗 Merge All Data",
+            "type": "main",
+            "index": 3
+          }
+        ]
+      ]
+    },
+    "📄 Fetch Content Config1": {
+      "main": [
+        [
+          {
+            "node": "✅ Validate Input1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "30d1f2ac-23b7-440c-87a2-bc4570ba7f2e",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "33baa129ea910aca249a999488d75355108fcb8a1227dfcf3361e21c6b28f891"
+  },
+  "id": "4KH2ji9I360MpH5Y",
+  "tags": []
+}
