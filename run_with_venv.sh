@@ -15,9 +15,9 @@ else
     source venv/bin/activate
 fi
 
-# Run the main.py script
+# Run the app.py script
 echo "🚀 Starting the server with virtual environment..."
-python main_fixed.py
+python app.py
 
 # If the server was stopped, deactivate the virtual environment
 deactivate

@@ -111,7 +111,12 @@ A4F_API_URL = "https://api.a4f.co/v1/audio/transcriptions"
 FORCE_LOCAL_WHISPER = True
 
 # Global configuration
-SUBTITLE_SIZE_MULTIPLIER = 0.6  # Medium font size for balanced readability
+SUBTITLE_SIZE_MULTIPLIER = 0.5  # Smaller font size (changed from 0.6 to 0.5 for size 15)
+
+# Font configuration
+CUSTOM_FONT_PATH = "/Users/techmero/Downloads/n8n_video_shorts_creator_yt_techmero/n8n-ffmpeg/video-api/Bangers/Bangers-Regular.ttf"
+SUBTITLE_FONT_SIZE = 19  # Font size in pixels
+SUBTITLE_FONT_NAME = "Bangers"  # Font family name
 
 # Path configuration for random clips feature
 CLIPS_FOLDER = "/Users/techmero/Downloads/Random_clips"
@@ -120,4 +125,9 @@ VOICEOVER_FOLDER = "/Users/techmero/Downloads/n8n_video_shorts_creator_yt_techme
 CTA_FOLDER = "/Users/techmero/Downloads/n8n_video_shorts_creator_yt_techmero/n8n-ffmpeg/video-api/TEST"
 
 # Default clip duration for random clips feature
-CLIP_DURATION = 2.0  # seconds
+CLIP_DURATION = 4.0  # seconds - Changed from 2.0 to 4.0 for longer clips
+
+# Transition settings
+ENABLE_TRANSITIONS = True  # Enable transitions between clips
+TRANSITION_DURATION = 0.2  # seconds - Duration of each transition (very fast)
+TRANSITION_TYPE = "crossfade"  # Options: "crossfade", "slide", "fade", "zoom"

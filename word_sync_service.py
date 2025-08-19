@@ -11,6 +11,7 @@ import shutil
 from typing import List, Dict, Any
 from captacity import add_captions
 from whisper_service import transcribe_with_whisper
+from config import CUSTOM_FONT_PATH, SUBTITLE_FONT_SIZE
 
 def create_word_level_subtitles(voiceover_path: str, cta_path: str = None, timing_info: Dict = None) -> List[Dict]:
     """
@@ -222,11 +223,15 @@ def create_enhanced_subtitle_video(video_path: str, subtitle_segments: List[Dict
         print(f"🎥 Using Captacity with {len(captacity_segments)} segments...")
         print(f"📝 Sample segment: {captacity_segments[0]['text'][:50]}...")
         
+        # Determine font to use
+        font_path = CUSTOM_FONT_PATH if CUSTOM_FONT_PATH and os.path.exists(CUSTOM_FONT_PATH) else 'Arial'
+        font_size = SUBTITLE_FONT_SIZE if SUBTITLE_FONT_SIZE else 15
+        
         result_video = add_captions(
             video_file=video_path,
             output_file=output_path,
-            font='PoetsenOne-Regular.ttf',  
-            font_size=20,  # Smaller font size to fit better
+            font=font_path,  
+            font_size=font_size,  # Use configured font size
             font_color='white',
             stroke_width=2,
             stroke_color='black',

@@ -6,7 +6,7 @@ from utils import run_cmd
 from config import PYDUB_AVAILABLE
 
 
-def mix_audio_with_bgm_and_cta(voice_audio_path, bgm_path=None, cta_path=None, bgm_volume=0.3, cta_volume=0.8):
+def mix_audio_with_bgm_and_cta(voice_audio_path, bgm_path=None, cta_path=None, bgm_volume=0.6, cta_volume=1.5):
     """Mix voice audio with background music and call-to-action audio"""
     from config import MOVIEPY_AVAILABLE
     
@@ -327,7 +327,7 @@ def load_voiceover(path):
         raise
 
 
-def load_bgm(path, duration, volume=0.2):
+def load_bgm(path, duration, volume=0.6):
     """
     Load background music, loop/trim to duration, and adjust volume
     

@@ -45,21 +45,35 @@ def get_ffmpeg_font():
 
 def get_available_font():
     """Find an available font with robust fallbacks for MoviePy TextClip."""
-    from config import MOVIEPY_AVAILABLE
+    from config import MOVIEPY_AVAILABLE, CUSTOM_FONT_PATH, SUBTITLE_FONT_NAME
+    import os
     
     if not MOVIEPY_AVAILABLE:
         return "Arial"
         
     from moviepy.editor import TextClip
     
-    # Extended font list with better coverage
-    default_fonts = [
+    # Try custom font first (Bangers)
+    bangers_candidates = []
+    if CUSTOM_FONT_PATH and os.path.exists(CUSTOM_FONT_PATH):
+        bangers_candidates.append(CUSTOM_FONT_PATH)
+    
+    # Add system font names for Bangers
+    bangers_candidates.extend([
+        "Bangers-Regular",
+        "Bangers",
+        SUBTITLE_FONT_NAME if SUBTITLE_FONT_NAME else None
+    ])
+    bangers_candidates = [f for f in bangers_candidates if f is not None]
+    
+    # Extended font list with Bangers first, then fallbacks
+    all_fonts = bangers_candidates + [
         "Arial", "Helvetica", "DejaVu Sans", "Liberation Sans", 
         "Ubuntu", "Roboto", "Times New Roman", "Verdana", 
         "Tahoma", "Calibri", "Georgia", "Open Sans"
     ]
     
-    for font in default_fonts:
+    for font in all_fonts:
         try:
             # Test with a minimal TextClip
             test_clip = TextClip("T", font=font, fontsize=20, color='white')
@@ -263,3 +277,120 @@ def get_random_clips(folder, clip_duration, total_duration):
             video_clips.extend(video_clips[:min(clips_needed - len(video_clips), len(video_clips))])
     
     return video_clips[:clips_needed]
+
+
+def apply_transitions(video_clips, transition_type="crossfade", transition_duration=0.5):
+    """
+    Apply transitions between video clips for smooth clip changes
+    
+    Args:
+        video_clips: List of MoviePy VideoFileClip objects
+        transition_type: Type of transition ("crossfade", "slide", "fade", "zoom")
+        transition_duration: Duration of each transition in seconds
+    
+    Returns:
+        List of video clips with transitions applied
+    """
+    from config import MOVIEPY_AVAILABLE
+    
+    if not MOVIEPY_AVAILABLE or len(video_clips) <= 1:
+        return video_clips
+    
+    try:
+        from moviepy.editor import CompositeVideoClip, ColorClip
+        
+        print(f"🎬 Applying {transition_type} transitions ({transition_duration}s duration)...")
+        
+        transitioned_clips = []
+        
+        for i in range(len(video_clips)):
+            clip = video_clips[i]
+            
+            if i == 0:
+                # First clip - no transition at start
+                transitioned_clips.append(clip)
+            else:
+                # Apply transition between previous and current clip
+                prev_clip = video_clips[i-1]
+                
+                if transition_type == "crossfade":
+                    # Crossfade transition
+                    clip_with_fadein = clip.fadein(transition_duration)
+                    transitioned_clips.append(clip_with_fadein)
+                    
+                elif transition_type == "fade":
+                    # Fade to black then fade in
+                    clip_with_fade = clip.fadein(transition_duration)
+                    transitioned_clips.append(clip_with_fade)
+                    
+                elif transition_type == "slide":
+                    # Simple slide transition (fade in effect)
+                    clip_with_slide = clip.fadein(transition_duration * 0.3)
+                    transitioned_clips.append(clip_with_slide)
+                    
+                elif transition_type == "zoom":
+                    # Zoom transition effect
+                    clip_with_zoom = clip.fadein(transition_duration * 0.5)
+                    transitioned_clips.append(clip_with_zoom)
+                    
+                else:
+                    # Default to crossfade
+                    clip_with_fadein = clip.fadein(transition_duration)
+                    transitioned_clips.append(clip_with_fadein)
+        
+        print(f"✅ Applied transitions to {len(transitioned_clips)} clips")
+        return transitioned_clips
+        
+    except Exception as e:
+        print(f"⚠️ Transition application failed: {e}")
+        print("🔄 Falling back to clips without transitions")
+        return video_clips
+
+
+def create_smooth_transitions(video_clips, transition_duration=0.5):
+    """
+    Create smooth crossfade transitions between clips
+    
+    Args:
+        video_clips: List of MoviePy VideoFileClip objects
+        transition_duration: Duration of crossfade in seconds
+    
+    Returns:
+        List of clips with crossfade transitions
+    """
+    from config import MOVIEPY_AVAILABLE
+    
+    if not MOVIEPY_AVAILABLE or len(video_clips) <= 1:
+        return video_clips
+    
+    try:
+        print(f"🌟 Creating smooth crossfade transitions ({transition_duration}s)...")
+        
+        smooth_clips = []
+        
+        for i, clip in enumerate(video_clips):
+            if i == 0:
+                # First clip - just add fadeout at the end
+                if clip.duration > transition_duration:
+                    smooth_clip = clip.fadeout(transition_duration)
+                    smooth_clips.append(smooth_clip)
+                else:
+                    smooth_clips.append(clip)
+            else:
+                # Apply both fadein and fadeout
+                if clip.duration > transition_duration * 2:
+                    smooth_clip = clip.fadein(transition_duration).fadeout(transition_duration)
+                elif clip.duration > transition_duration:
+                    smooth_clip = clip.fadein(transition_duration)
+                else:
+                    smooth_clip = clip.fadein(min(transition_duration, clip.duration * 0.3))
+                
+                smooth_clips.append(smooth_clip)
+        
+        print(f"✅ Created smooth transitions for {len(smooth_clips)} clips")
+        return smooth_clips
+        
+    except Exception as e:
+        print(f"⚠️ Smooth transition creation failed: {e}")
+        print("🔄 Using clips without transitions")
+        return video_clips

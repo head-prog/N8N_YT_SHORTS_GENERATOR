@@ -3,7 +3,7 @@ import uuid
 import json
 import tempfile
 import traceback
-from config import MOVIEPY_AVAILABLE, SUBTITLE_SIZE_MULTIPLIER, CLIPS_FOLDER, CLIP_DURATION
+from config import MOVIEPY_AVAILABLE, SUBTITLE_SIZE_MULTIPLIER, CLIPS_FOLDER, CLIP_DURATION, CUSTOM_FONT_PATH, SUBTITLE_FONT_SIZE
 from audio_service import safe_load_audio, mix_audio_with_bgm_and_cta, transcribe_cta_audio, load_voiceover, load_bgm, load_cta, merge_audio
 from utils import run_cmd, get_available_font, calculate_optimal_font_size, get_ffmpeg_font, get_random_clips
 from subtitle_service import segments_to_srt
@@ -67,7 +67,7 @@ def safe_load_video(path):
     raise Exception("Failed to load video after all attempts")
 
 
-def create_video_with_subtitles_moviepy(video_path, audio_path, subtitle_segments=None, output_path=None, bgm_path=None, cta_path=None, bgm_volume=0.3, cta_volume=0.8):
+def create_video_with_subtitles_moviepy(video_path, audio_path, subtitle_segments=None, output_path=None, bgm_path=None, cta_path=None, bgm_volume=0.6, cta_volume=1.5):
     """Create video with audio, subtitles, BGM and CTA using MoviePy 2.2.1"""
     if not MOVIEPY_AVAILABLE:
         raise Exception("MoviePy not available")
@@ -294,7 +294,7 @@ def create_video_with_subtitles_moviepy(video_path, audio_path, subtitle_segment
         return None
 
 
-def create_video_with_subtitles_ffmpeg(video_path, audio_path, subtitle_segments=None, output_path=None, bgm_path=None, cta_path=None, bgm_volume=0.3, cta_volume=0.8):
+def create_video_with_subtitles_ffmpeg(video_path, audio_path, subtitle_segments=None, output_path=None, bgm_path=None, cta_path=None, bgm_volume=0.6, cta_volume=1.5):
     """Create video using FFmpeg with burned-in subtitles, BGM and CTA for maximum compatibility"""
     try:
         if not output_path:
@@ -373,7 +373,17 @@ def create_video_with_subtitles_ffmpeg(video_path, audio_path, subtitle_segments
                 margin_v = 100
                 margin_lr = 50
             
-            ffmpeg_font = get_ffmpeg_font()
+            # Use custom font file if available, otherwise fallback to default
+            if CUSTOM_FONT_PATH and os.path.exists(CUSTOM_FONT_PATH):
+                # For FFmpeg, use the font name since it's installed system-wide
+                font_setting = f"FontName=Bangers"
+                optimal_font_size = SUBTITLE_FONT_SIZE  # Use configured font size
+                print(f"🎨 Using Bangers font for FFmpeg subtitles")
+            else:
+                # Fallback to system font
+                ffmpeg_font = get_ffmpeg_font()
+                font_setting = f"FontName={ffmpeg_font}"
+                print(f"🎨 Using system font: {ffmpeg_font}")
             
             # FFmpeg command with subtitle burning optimized for vertical videos
             cmd = [
@@ -382,7 +392,7 @@ def create_video_with_subtitles_ffmpeg(video_path, audio_path, subtitle_segments
                 '-i', final_audio_path,  # Use mixed audio
                 '-map', '0:v:0',    # Explicitly map video from first input
                 '-map', '1:a:0',    # Explicitly map audio from second input
-                '-vf', f"subtitles={srt_temp.name}:force_style='FontName={ffmpeg_font},FontSize={optimal_font_size},PrimaryColour=&Hffffff,OutlineColour=&H000000,Outline=2,BackColour=&H80000000,BorderStyle=1,Alignment=2,MarginV={margin_v},MarginL={margin_lr},MarginR={margin_lr},Bold=1,WrapStyle=2,Spacing=2'",
+                '-vf', f"subtitles={srt_temp.name}:force_style='{font_setting},FontSize={optimal_font_size},PrimaryColour=&Hffffff,OutlineColour=&H000000,Outline=2,BackColour=&H80000000,BorderStyle=1,Alignment=2,MarginV={margin_v},MarginL={margin_lr},MarginR={margin_lr},Bold=1,WrapStyle=2,Spacing=2'",
                 '-c:v', 'libx264',
                 '-c:a', 'aac',
                 '-ar', '48000',  # 48kHz audio sample rate as per your requirement
@@ -564,8 +574,8 @@ def create_video_with_random_clips(voiceover_path, bgm_path, output_path, cta_pa
             output_path=output_path,
             bgm_path=bgm_path,
             cta_path=cta_path,
-            bgm_volume=0.2,
-            cta_volume=0.8
+            bgm_volume=0.6,
+            cta_volume=1.5
         )
         
         # Cleanup temporary files
@@ -588,7 +598,7 @@ def create_video_with_random_clips(voiceover_path, bgm_path, output_path, cta_pa
         return None
 
 
-def create_video_with_random_clips_fixed(voiceover_path, output_path, bgm_path=None, cta_path=None):
+def create_video_with_random_clips_fixed(voiceover_path, output_path, bgm_path=None, cta_path=None, bgm_volume=0.6, cta_volume=1.5):
     """
     Create video with random clips using the proven direct MoviePy approach.
     This function replaces the problematic create_video_with_random_clips function.
@@ -638,7 +648,7 @@ def create_video_with_random_clips_fixed(voiceover_path, output_path, bgm_path=N
         if bgm_path or cta_path:
             print("🎵 Mixing audio with BGM/CTA...")
             mixed_audio_path, final_duration, timing_info = mix_audio_with_bgm_and_cta(
-                voiceover_path, bgm_path, cta_path, 0.2, 0.8
+                voiceover_path, bgm_path, cta_path, bgm_volume, cta_volume
             )
             audio = safe_load_audio(mixed_audio_path)
             print(f"🎵 Mixed audio duration: {final_duration:.2f}s")
@@ -691,7 +701,7 @@ def create_video_with_random_clips_fixed(voiceover_path, output_path, bgm_path=N
         return None
 
 
-def create_video_with_random_clips_and_subtitles(voiceover_path, output_path, bgm_path=None, cta_path=None):
+def create_video_with_random_clips_and_subtitles(voiceover_path, output_path, bgm_path=None, cta_path=None, bgm_volume=0.6, cta_volume=1.5):
     """
     Create video with random clips, audio mixing, and dynamic subtitles for voiceover and CTA.
     Subtitles are timed so CTA subtitles start exactly when voiceover ends.
@@ -746,7 +756,7 @@ def create_video_with_random_clips_and_subtitles(voiceover_path, output_path, bg
         if bgm_path or cta_path:
             print("🎵 Mixing audio with BGM/CTA...")
             mixed_audio_path, final_duration, timing_info = mix_audio_with_bgm_and_cta(
-                voiceover_path, bgm_path, cta_path, 0.2, 0.8
+                voiceover_path, bgm_path, cta_path, bgm_volume, cta_volume
             )
             audio = safe_load_audio(mixed_audio_path)
             print(f"🎵 Mixed audio duration: {final_duration:.2f}s")
@@ -921,7 +931,7 @@ def create_video_with_random_clips_and_subtitles(voiceover_path, output_path, bg
         return None
 
 
-def create_video_with_random_clips_and_subtitles_optimized(voiceover_path, output_path, bgm_path=None, cta_path=None):
+def create_video_with_random_clips_and_subtitles_optimized(voiceover_path, output_path, bgm_path=None, cta_path=None, bgm_volume=0.6, cta_volume=1.5):
     """
     OPTIMIZED version: Create video with random clips and dynamic subtitles.
     Performance improvements:
@@ -980,7 +990,7 @@ def create_video_with_random_clips_and_subtitles_optimized(voiceover_path, outpu
         if bgm_path or cta_path:
             print("🎵 Mixing audio with BGM/CTA...")
             mixed_audio_path, final_duration, timing_info = mix_audio_with_bgm_and_cta(
-                voiceover_path, bgm_path, cta_path, 0.2, 0.8
+                voiceover_path, bgm_path, cta_path, bgm_volume, cta_volume
             )
             audio = safe_load_audio(mixed_audio_path)
             print(f"🎵 Mixed audio duration: {final_duration:.2f}s")
@@ -1192,7 +1202,7 @@ def create_video_with_random_clips_and_subtitles_optimized(voiceover_path, outpu
         return None
 
 
-def create_video_with_ffmpeg_subtitles(voiceover_path, output_path, bgm_path=None, cta_path=None):
+def create_video_with_ffmpeg_subtitles(voiceover_path, output_path, bgm_path=None, cta_path=None, bgm_volume=0.6, cta_volume=1.5):
     """
     FFMPEG-based ultra-fast subtitle generation.
     Uses FFmpeg subtitle filter instead of MoviePy TextClip for 10x speed improvement.
@@ -1240,6 +1250,12 @@ def create_video_with_ffmpeg_subtitles(voiceover_path, output_path, bgm_path=Non
                 print(f"❌ Failed to process clip {i+1}: {e}")
                 continue
         
+        # Apply transitions between clips
+        from config import ENABLE_TRANSITIONS, TRANSITION_DURATION, TRANSITION_TYPE
+        if ENABLE_TRANSITIONS and len(processed_clips) > 1:
+            from utils import create_smooth_transitions
+            processed_clips = create_smooth_transitions(processed_clips, TRANSITION_DURATION)
+        
         # Concatenate video clips
         print("🔗 Concatenating video clips...")
         video_clip = concatenate_videoclips(processed_clips)
@@ -1251,7 +1267,7 @@ def create_video_with_ffmpeg_subtitles(voiceover_path, output_path, bgm_path=Non
         if bgm_path or cta_path:
             print("🎵 Mixing audio with BGM/CTA...")
             mixed_audio_path, final_duration, timing_info = mix_audio_with_bgm_and_cta(
-                voiceover_path, bgm_path, cta_path, 0.4, 0.8
+                voiceover_path, bgm_path, cta_path, bgm_volume, cta_volume
             )
             audio = safe_load_audio(mixed_audio_path)
             print(f"🎵 Mixed audio duration: {final_duration:.2f}s")
@@ -1494,10 +1510,10 @@ def create_video_with_ffmpeg_subtitles(voiceover_path, output_path, bgm_path=Non
             
             f.write("[V4+ Styles]\n")
             f.write("Format: Name, Fontname, Fontsize, PrimaryColour, SecondaryColour, OutlineColour, BackColour, Bold, Italic, Underline, StrikeOut, ScaleX, ScaleY, Spacing, Angle, BorderStyle, Outline, Shadow, Alignment, MarginL, MarginR, MarginV, Encoding\n")
-            # Style for voiceover - white text, medium font (18px), TRUE CENTER (alignment=5 = middle center)
-            f.write("Style: Voiceover,Arial,18,&H00FFFFFF,&H000000FF,&H00000000,&H80000000,1,0,0,0,100,100,0,0,1,2,0,5,0,0,0,1\n")
-            # Style for CTA - yellow text, medium font (18px), TRUE CENTER (alignment=5 = middle center)  
-            f.write("Style: CTA,Arial,18,&H0000FFFF,&H000000FF,&H00000000,&H80000000,1,0,0,0,100,100,0,0,1,2,0,5,0,0,0,1\n\n")
+            # Style for voiceover - white text, small font (19px), TRUE CENTER (alignment=5 = middle center)
+            f.write("Style: Voiceover,Bangers,19,&H00FFFFFF,&H000000FF,&H00000000,&H80000000,1,0,0,0,100,100,0,0,1,2,0,5,0,0,0,1\n")
+            # Style for CTA - yellow text, small font (19px), TRUE CENTER (alignment=5 = middle center)  
+            f.write("Style: CTA,Bangers,19,&H0000FFFF,&H000000FF,&H00000000,&H80000000,1,0,0,0,100,100,0,0,1,2,0,5,0,0,0,1\n\n")
             
             f.write("[Events]\n")
             f.write("Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text\n")

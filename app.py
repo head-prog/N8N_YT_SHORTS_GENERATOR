@@ -127,8 +127,8 @@ def generate_video_with_synced_subtitles():
         try:
             # Get parameters
             model_name = request.form.get('model', 'base')
-            bgm_volume = float(request.form.get('bgm_volume', 0.3))  # BGM volume
-            cta_volume = float(request.form.get('cta_volume', 0.8))  # CTA volume
+            bgm_volume = float(request.form.get('bgm_volume', 0.6))  # BGM volume (increased)
+            cta_volume = float(request.form.get('cta_volume', 1.5))  # CTA volume (louder than voiceover)
             language = request.form.get('language', None)
             max_words = int(request.form.get('max_words', 3))
             use_moviepy = request.form.get('use_moviepy', 'false').lower() == 'true'
@@ -234,7 +234,7 @@ def transcribe_whisper_endpoint():
 
 @app.route('/generate-video-with-random-clips', methods=['POST'])
 def generate_video_with_random_clips_endpoint():
-    """Generate video from random 2-second clips with voiceover, BGM, and optional CTA"""
+    """Generate video from random 4-second clips with voiceover, BGM, and optional CTA"""
     try:
         # Validate required files
         if 'voiceover' not in request.files or 'bgm' not in request.files:
@@ -278,6 +278,21 @@ def generate_video_with_random_clips_endpoint():
         # Check if subtitles are requested (default: True)
         add_subtitles = request.form.get('add_subtitles', 'true').lower() == 'true'
         
+        # Check transition settings
+        enable_transitions = request.form.get('enable_transitions', 'true').lower() == 'true'
+        transition_duration = float(request.form.get('transition_duration', '0.5'))
+        transition_type = request.form.get('transition_type', 'crossfade')
+        
+        # Get audio volume settings
+        bgm_volume = float(request.form.get('bgm_volume', 0.6))  # BGM volume (increased)
+        cta_volume = float(request.form.get('cta_volume', 1.5))  # CTA volume (louder than voiceover)
+        
+        # Update config temporarily for this request
+        if enable_transitions:
+            print(f"🎬 Transitions enabled: {transition_type} ({transition_duration}s)")
+        else:
+            print("🎬 Transitions disabled for this request")
+        
         try:
             # Generate output filename
             output_filename = f"random_clips_video_{uuid.uuid4().hex[:8]}.mp4"
@@ -288,13 +303,15 @@ def generate_video_with_random_clips_endpoint():
                 # Import the ULTRA-FAST FFMPEG SUBTITLE function for maximum performance
                 from video_service import create_video_with_ffmpeg_subtitles
                 
-                # Create video with random clips and MEDIUM CENTERED SUBTITLES (18px font, ASS format)
-                print(f"🎯 Creating video with random clips and MEDIUM CENTERED SUBTITLES (18px font, perfectly centered with ASS format)...")
+                # Create video with random clips and SMALL BANGERS SUBTITLES (15px font, ASS format)
+                print(f"🎯 Creating video with random clips and SMALL BANGERS SUBTITLES (15px Bangers font, perfectly centered with ASS format)...")
                 result_path = create_video_with_ffmpeg_subtitles(
                     voiceover_path=voiceover_path,
                     bgm_path=bgm_path,
                     output_path=output_path,
-                    cta_path=cta_path
+                    cta_path=cta_path,
+                    bgm_volume=bgm_volume,
+                    cta_volume=cta_volume
                 )
             else:
                 # Import the FIXED function (no subtitles)
@@ -306,29 +323,43 @@ def generate_video_with_random_clips_endpoint():
                     voiceover_path=voiceover_path,
                     bgm_path=bgm_path,
                     output_path=output_path,
-                    cta_path=cta_path
+                    cta_path=cta_path,
+                    bgm_volume=bgm_volume,
+                    cta_volume=cta_volume
                 )
             
             if not result_path or not os.path.exists(result_path):
                 return jsonify({"error": "Video creation failed"}), 500
             
-            # Return success response with file path (you can modify this to return the file directly)
-            return jsonify({
-                "success": True,
-                "message": f"Video created successfully with random clips{' and perfectly centered subtitles (18px)' if add_subtitles else ''}",
-                "output_path": result_path,
-                "has_subtitles": add_subtitles,
-                "subtitle_features": {
-                    "font_size": "18px (medium)",
-                    "position": "perfectly centered (middle of video)",
-                    "format": "ASS format",
-                    "chunking": "2-3 words per subtitle",
-                    "colors": "white for voiceover, yellow for CTA"
-                } if add_subtitles else None,
-                "voiceover_path": voiceover_path,
-                "bgm_path": bgm_path,
-                "cta_path": cta_path
-            })
+            # Get file size for response headers
+            file_size = os.path.getsize(result_path)
+            
+            print(f"✅ Video created successfully: {result_path}")
+            print(f"📊 File size: {file_size / (1024*1024):.1f} MB")
+            print(f"📥 Sending file as downloadable response...")
+            
+            # Return the video file as a downloadable response
+            response = send_file(
+                result_path,
+                as_attachment=True,
+                download_name=f"enhanced_video_{uuid.uuid4().hex[:8]}.mp4",
+                mimetype='video/mp4'
+            )
+            
+            # Optional: Clean up temporary uploaded files after sending
+            # (The result video file will be cleaned up by the system temp folder)
+            try:
+                if os.path.exists(voiceover_path):
+                    os.remove(voiceover_path)
+                if os.path.exists(bgm_path):
+                    os.remove(bgm_path)
+                if cta_path and os.path.exists(cta_path):
+                    os.remove(cta_path)
+                print("🧹 Cleaned up temporary uploaded files")
+            except Exception as cleanup_error:
+                print(f"⚠️ Cleanup warning: {cleanup_error}")
+            
+            return response
             
         except Exception as creation_error:
             print(f"❌ Video creation error: {creation_error}")

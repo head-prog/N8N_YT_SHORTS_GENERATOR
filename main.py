@@ -1598,7 +1598,7 @@ def upload_files_whisper():
                 '-i', temp_voiceover.name,
                 '-i', temp_cta.name, 
                 '-i', temp_bgm.name,
-                '-filter_complex', '[0:a]volume=2.0,atempo=1.25[v];[1:a]volume=1.8,atempo=1.25[c];[2:a]volume=0.4[b];[v][c][b]amix=inputs=3:duration=longest:normalize=0[out]',
+                '-filter_complex', '[0:a]volume=2.0,atempo=1.25[v];[1:a]volume=3.0,atempo=1.25[c];[2:a]volume=1.2[b];[v][c][b]amix=inputs=3:duration=longest:normalize=0[out]',
                 '-map', '[out]',
                 '-c:a', 'aac',
                 '-b:a', '192k',
