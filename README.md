@@ -205,23 +205,40 @@ For issues and questions:
 - Check the [Wiki](https://github.com/head-prog/N8N_YT_SHORTS_GENERATOR/wiki) for detailed documentation
 - Review the test files in the `TEST/` directory for examples
 
-## 🎬 Demo
+## 🎬 Demo & Examples
 
-The system generates professional YouTube Shorts with:
+### Example Output Video
+Check out `examples/test_final_volume_fix.mp4` for a sample generated video showcasing:
 - ✅ Perfect subtitle centering for mobile viewing
 - ✅ Balanced audio mixing (voice, BGM, CTA)
 - ✅ Smooth transitions between random clips
 - ✅ Word-perfect synchronization
 - ✅ High-quality output optimized for social media
 
-### Example Output
+### N8N Workflow Integration
 
-- **`test_final_volume_fix.mp4`**: Sample generated video showcasing all features including the latest BGM/CTA volume improvements
-- **`final_yt_shorts_workflow.json`**: Complete N8N workflow configuration for automated video generation
+![N8N Workflow](examples/n8n_workflow_screenshot.png)
+
+The repository includes a complete N8N workflow (`examples/final_yt_shorts_workflow.json`) that demonstrates:
+- **Form Trigger**: Collects user input for video generation
+- **Content Validation**: Validates uploaded audio files
+- **AI Script Generation**: Uses OpenAI to enhance content
+- **TTS Conversion**: Converts text to speech
+- **Video Generation**: Calls the API to create the final video
+- **Error Handling**: Robust error management throughout the process
+
+**Import the workflow:**
+1. Copy the content of `examples/final_yt_shorts_workflow.json`
+2. In N8N, go to Workflows → Import from JSON
+3. Paste the workflow and configure your API endpoints
+4. Set up your OpenAI API key and other credentials
+5. Test with the form trigger
+
+The workflow automates the entire video creation process from content input to final video output, making it perfect for content creators and agencies.
 
 ## 🔧 N8N Integration
 
-The included N8N workflow (`final_yt_shorts_workflow.json`) provides:
+The included N8N workflow (`examples/final_yt_shorts_workflow.json`) provides:
 - Automated video generation triggers
 - File upload handling
 - API integration with the Flask server
@@ -229,7 +246,7 @@ The included N8N workflow (`final_yt_shorts_workflow.json`) provides:
 - Batch processing capabilities
 
 To use the N8N workflow:
-1. Import `final_yt_shorts_workflow.json` into your N8N instance
+1. Import `examples/final_yt_shorts_workflow.json` into your N8N instance
 2. Configure the API endpoint URL
 3. Set up your file input sources
 4. Activate the workflow
